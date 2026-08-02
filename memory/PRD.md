@@ -61,3 +61,6 @@ industrial automation. Not a ChatGPT wrapper — a professional engineering work
 - Complete UI + backend + AI integration
 - Knowledge base seeded on startup
 - Deployment-ready (single supervisor stack)
+- Iter 2: Wiring Generator page with visual pin-map + Simulate tab (Wokwi + Serial preview)
+- Iter 3: Component Library picker on Wiring page; Shareable Wiring (public /share/wiring/:token);
+  Emergent Google Auth bridged into existing JWT flow (/auth/callback + POST /api/v1/auth/google)
