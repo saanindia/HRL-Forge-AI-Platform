@@ -23,7 +23,9 @@ export default function Login() {
     try {
       await login(email, password);
       toast.success("Welcome back to HRL Forge");
-      nav("/app/dashboard");
+      const dest = localStorage.getItem("hrl_after_login");
+      localStorage.removeItem("hrl_after_login");
+      nav(dest || "/app/dashboard");
     } catch (err) {
       toast.error(err?.response?.data?.detail || "Sign-in failed");
     } finally {

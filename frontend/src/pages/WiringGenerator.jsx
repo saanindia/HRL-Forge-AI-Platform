@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import AppShell from "@/components/AppShell";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ const SUGGESTIONS = [
 ];
 
 export default function WiringGenerator() {
+  const [params] = useSearchParams();
   const [boards, setBoards] = useState([]);
   const [board, setBoard] = useState("arduino-uno");
   const [prompt, setPrompt] = useState("");
@@ -68,6 +70,25 @@ export default function WiringGenerator() {
   useEffect(() => {
     api.get("/boards").then((r) => setBoards(r.data));
   }, []);
+
+  // Hydrate from a shared wiring token (?fork=<token>) — public endpoint, no auth needed
+  useEffect(() => {
+    const forkToken = params.get("fork");
+    if (!forkToken) return;
+    api
+      .get(`/wiring/share/${forkToken}`)
+      .then((r) => {
+        const s = r.data;
+        setBoard(s.board);
+        setPrompt(s.prompt);
+        setConnections(s.connections || []);
+        setBom(s.bom || []);
+        setLibraries(s.libraries || []);
+        setNotes(s.notes || "");
+        toast.success("Forked into your workspace — edit and regenerate.");
+      })
+      .catch(() => toast.error("Could not load shared wiring to fork."));
+  }, [params]);
 
   const boardObj = useMemo(
     () => boards.find((b) => b.slug === board),

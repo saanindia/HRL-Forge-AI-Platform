@@ -37,10 +37,12 @@ export default function AuthCallback() {
         const { data } = await api.post("/auth/google", { session_id: sessionId });
         localStorage.setItem("hrl_token", data.access_token);
         // Clear the fragment before hydrating auth state
-        window.history.replaceState(null, "", "/app/dashboard");
+        const dest = localStorage.getItem("hrl_after_login") || "/app/dashboard";
+        localStorage.removeItem("hrl_after_login");
+        window.history.replaceState(null, "", dest);
         await setUserFromToken();
         toast.success(`Welcome, ${data.user.name.split(" ")[0]}`);
-        nav("/app/dashboard", { replace: true });
+        nav(dest, { replace: true });
       } catch (e) {
         toast.error(e?.response?.data?.detail || "Google sign-in failed");
         nav("/login", { replace: true });

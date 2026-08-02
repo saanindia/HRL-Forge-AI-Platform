@@ -24,6 +24,7 @@ from routers.chat_router import router as chat_router  # noqa: E402
 from routers.settings_router import router as settings_router  # noqa: E402
 from routers.admin_router import router as admin_router  # noqa: E402
 from routers.wiring_router import router as wiring_router  # noqa: E402
+from routers.search_router import router as search_router  # noqa: E402
 
 
 # ---------- Logging ----------
@@ -95,6 +96,7 @@ v1.include_router(chat_router)
 v1.include_router(settings_router)
 v1.include_router(admin_router)
 v1.include_router(wiring_router)
+v1.include_router(search_router)
 
 api_router.include_router(v1)
 app.include_router(api_router)

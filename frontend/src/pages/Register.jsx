@@ -22,7 +22,9 @@ export default function Register() {
     try {
       await register(form.email, form.password, form.name);
       toast.success("Account created. Welcome to HRL Forge AI.");
-      nav("/app/dashboard");
+      const dest = localStorage.getItem("hrl_after_login");
+      localStorage.removeItem("hrl_after_login");
+      nav(dest || "/app/dashboard");
     } catch (err) {
       toast.error(err?.response?.data?.detail || "Registration failed");
     } finally {

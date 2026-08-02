@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Logo } from "@/components/Logo";
 import { PinDiagram } from "@/components/PinDiagram";
@@ -13,6 +13,7 @@ import {
   Eye,
   Copy,
   ExternalLink,
+  GitFork,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -21,6 +22,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 /** Public shared-wiring page — no auth required. */
 export default function SharedWiring() {
   const { token } = useParams();
+  const nav = useNavigate();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
@@ -36,6 +38,17 @@ export default function SharedWiring() {
   const copyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     toast.success("Link copied");
+  };
+
+  const forkIt = () => {
+    const authed = !!localStorage.getItem("hrl_token");
+    const target = `/app/wiring?fork=${token}`;
+    if (authed) {
+      nav(target);
+    } else {
+      localStorage.setItem("hrl_after_login", target);
+      nav("/register");
+    }
   };
 
   if (error) {
@@ -96,12 +109,14 @@ export default function SharedWiring() {
             >
               <Copy className="w-3.5 h-3.5 mr-1.5" /> Copy link
             </Button>
-            <Link to="/register">
-              <Button className="bg-yellow-500 hover:bg-yellow-400 text-[#050B14] font-semibold h-9">
-                Build your own
-                <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
-              </Button>
-            </Link>
+            <Button
+              onClick={forkIt}
+              className="bg-yellow-500 hover:bg-yellow-400 text-[#050B14] font-semibold h-9"
+              data-testid="share-fork-btn"
+            >
+              <GitFork className="w-3.5 h-3.5 mr-1.5" />
+              Fork this wiring
+            </Button>
           </div>
         </div>
       </header>

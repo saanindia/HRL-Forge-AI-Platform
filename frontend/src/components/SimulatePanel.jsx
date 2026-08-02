@@ -30,11 +30,18 @@ export function SimulatePanel({ code, board, language, prompt }) {
   const canWokwi = !!wokwiBoard;
 
   const openWokwi = async () => {
-    if (!code) return toast.error("Generate code first");
-    try {
-      await navigator.clipboard.writeText(code);
-    } catch (_) {}
-    toast.success("Code copied — paste into Wokwi's editor");
+    // Always launches Wokwi — with the current code if there is any, otherwise
+    // opens the plain board template so the user can experiment.
+    if (code) {
+      try {
+        await navigator.clipboard.writeText(code);
+        toast.success("Code copied — paste into Wokwi's editor with ⌘/Ctrl+V");
+      } catch (_) {
+        toast.info("Wokwi opened — copy your code manually if needed");
+      }
+    } else {
+      toast.info(`Opening empty ${humanBoard(board)} playground on Wokwi`);
+    }
     window.open(`https://wokwi.com/projects/new/${wokwiBoard}`, "_blank", "noopener");
   };
 
@@ -93,12 +100,11 @@ export function SimulatePanel({ code, board, language, prompt }) {
           {canWokwi ? (
             <Button
               onClick={openWokwi}
-              disabled={!code}
               className="w-full bg-yellow-500 hover:bg-yellow-400 text-[#050B14] font-semibold h-11"
               data-testid="wokwi-launch-btn"
             >
               <Play className="w-4 h-4 mr-2" />
-              Launch in Wokwi
+              {code ? "Launch in Wokwi with code" : "Open empty Wokwi playground"}
               <ExternalLink className="w-3.5 h-3.5 ml-2 opacity-70" />
             </Button>
           ) : (
@@ -108,8 +114,9 @@ export function SimulatePanel({ code, board, language, prompt }) {
             </div>
           )}
           <div className="mt-3 text-[10px] text-slate-600 font-mono">
-            Code is copied to your clipboard — paste with ⌘/Ctrl+V once the Wokwi editor
-            opens.
+            {code
+              ? "Code is copied to your clipboard — paste with ⌘/Ctrl+V once the Wokwi editor opens."
+              : "Generate code first if you want the sketch pre-copied, or start from scratch."}
           </div>
         </div>
 

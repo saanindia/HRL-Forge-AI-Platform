@@ -1,0 +1,31 @@
+{
+  "summary": "Iteration 4 testing complete for HRL Forge AI. Backend (10/10 pytest passing) — NEW GET /api/v1/search: q='esp32' returns 2 template hits (wifi-scan-esp32, mqtt-esp32) and 1 board hit (esp32); q='blink' returns >=1 template; q='nonexistentxyz' returns total=0 with all groups present as empty arrays; missing q -> 422; unauthenticated -> 401/403. Regression smoke passed (register/login, /wiring/share create + public GET, /boards, /templates, /generate reachable). Frontend — data-testid='search-trigger' present in sidebar; click opens data-testid='search-palette'; typing 'esp32' + ~700ms debounce renders TEMPLATES group (search-result-templates-wifi-scan-esp32, search-result-templates-mqtt-esp32) and BOARDS group (search-result-boards-esp32); ArrowDown+Enter navigates to /app/workspace?template=mqtt-esp32. Cmd+K (Meta+K) AND Ctrl+K (Control+K) both open the palette. Fork-a-Share: precreated share token dcc0f347bf6f, visited /share/wiring/dcc0f347bf6f, share-fork-btn present; click routes to /app/wiring?fork=dcc0f347bf6f; hydration correctly populated the wiring-prompt textarea ('Wire DHT22 to Arduino Uno for temperature monitoring'), pin-mapping tab shows wiring-row-0 (DHT22 / DATA / D2 / with 10k pull-up), share-wiring-btn is visible (connections.length>0), and a 'Forked into your workspace' toast fires. Wokwi launcher: on /app/workspace with no code, tab-simulate shows wokwi-launch-btn CLICKABLE (disabled=false) with label 'Open empty Wokwi playground' — verified. Regression routes /app/dashboard, /app/workspace, /app/wiring, /app/templates all render sidebar correctly.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration4.py",
+    "/app/test_reports/pytest/iteration4_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "search_router builds four separate Mongo queries sequentially with `async for`. For low limit (6) this is fine but consider asyncio.gather over the four cursors to parallelize IO under load.",
+    "SearchPalette debounce is 180ms in code (docstring said 500-700ms). Ensure product/UX agreed on 180ms — feels snappy but on slow networks may fire mid-typing bursts. Not a bug.",
+    "WiringGenerator's ?fork=<token> effect reuses /wiring/share/{token} via the shared axios instance which sends Authorization if present — the public endpoint ignores auth, so authed users work fine. For anonymous users, SharedWiring already redirects to /register via localStorage.hrl_after_login before hitting ?fork — verified path is safe.",
+    "Wokwi label swap works via ternary on `code`. Note: hydrating from ?template=<slug> in Workspace.jsx (lines 82-89) does NOT setCode — only prompt/board/language/projectName. So the label only swaps after Generate or manual typing. This matches product intent (templates are seeds, not code) but could confuse users expecting a template to include starter code.",
+    "SharedWiring.jsx forkIt() reads localStorage.hrl_token to decide anon vs authed. If the token is expired but present, forkIt() will still navigate to /app/wiring?fork=..., then the axios interceptor 401s; UX could be improved by validating token freshness first (or letting the shared endpoint being public save us — which it does).",
+    "Global search palette does not surface a keyboard hint for opening it (Cmd+K badge is inside the trigger label; good). The palette itself has no explicit ESC handler; relies on Radix Dialog. Works via Radix out of the box — verified Escape closes.",
+    "Templates page (Templates.jsx) uses data-testid=`template-<slug>` (not `template-card-<slug>` as one might guess) — no bug, just a documentation callout for next testing agents."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration4.py (new)"],
+  "success_rate": {"backend": "100% (10/10)", "frontend": "100% for all iteration-4 features tested"},
+  "test_credentials": "Backend: hrl.qa.it4+{ts}@myhrl.in / Forge2026! (registered at runtime). Frontend UI: hrl.uiit4b+{ts}@myhrl.in / Forge2026! (registered fresh during Playwright run) and a second helper account written to /tmp/ui4_email.txt.",
+  "seed_data_creation": "Created one WiringShare via POST /api/v1/wiring/share (token=dcc0f347bf6f) to test the fork-a-share flow on /share/wiring/{token}.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Run `pytest /app/backend/tests/test_iteration4.py -v -n0`. For the Wokwi 'Launch in Wokwi with code' label check — the ?template=<slug> URL parameter does NOT seed code (only prompt/board/language). To exercise the code-branch label, either (a) type into Monaco via .monaco-editor textarea.inputarea then switch to tab-simulate (Playwright typing is flaky in Monaco — try focusing then page.keyboard.type with a small delay), or (b) actually click wiring-generate-btn (expensive) or the Workspace Generate button. The 'no-code' path is fully verified. Cmd/Ctrl+K both open the palette; the debounce is 180ms not 500ms (still works reliably with a 700-900ms wait after typing).",
+  "rca of the issue": "No blocking bugs found in iteration 4. One informational RCA: the 'Wokwi label swap when code present' verification could not be automated via ?template=<slug> because Workspace.jsx template-hydration path does not call setCode (it only sets prompt/board/language). The SimulatePanel.jsx ternary `{code ? 'Launch in Wokwi with code' : 'Open empty Wokwi playground'}` is deterministic and code-inspected as correct; the 'no code' branch was UI-verified. If the main agent wants automatic verification, extend template loading to hydrate a starter code snippet (optional) or expose a data-testid on the label text so a Monaco-typed state can be asserted without depending on Wokwi copy toast."
+}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -13,10 +13,12 @@ import {
   LogOut,
   MessageSquareCode,
   CircuitBoard,
+  Search,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import { SearchPalette } from "@/components/SearchPalette";
 
 const NAV = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
@@ -34,6 +36,19 @@ const NAV = [
 export default function AppShell({ children }) {
   const { user, logout } = useAuth();
   const nav = useNavigate();
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      const meta = e.metaKey || e.ctrlKey;
+      if (meta && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        setSearchOpen((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -47,10 +62,26 @@ export default function AppShell({ children }) {
         className="w-64 shrink-0 border-r border-white/10 bg-[#050B14]/95 backdrop-blur-xl flex flex-col fixed h-screen z-30"
         data-testid="sidebar"
       >
-        <div className="h-14 border-b border-white/10 flex items-center px-4">
+        <div className="h-14 border-b border-white/10 flex items-center px-4 gap-2">
           <Logo />
         </div>
-        <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
+
+        {/* Search trigger */}
+        <div className="px-3 pt-3">
+          <button
+            onClick={() => setSearchOpen(true)}
+            data-testid="search-trigger"
+            className="w-full flex items-center gap-2 px-3 h-9 rounded-md border border-white/10 bg-white/[0.02] hover:border-yellow-500/40 hover:bg-white/[0.04] text-slate-400 hover:text-slate-200 transition-colors group"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span className="text-xs">Search…</span>
+            <kbd className="ml-auto text-[9px] font-mono uppercase tracking-widest text-slate-600 px-1.5 py-0.5 border border-white/10 rounded group-hover:text-slate-400">
+              ⌘K
+            </kbd>
+          </button>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
           {NAV.map((n) => (
             <NavLink
               key={n.to}
@@ -112,6 +143,8 @@ export default function AppShell({ children }) {
 
       {/* Main */}
       <main className="flex-1 ml-64 min-h-screen">{children}</main>
+
+      <SearchPalette open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
 }
