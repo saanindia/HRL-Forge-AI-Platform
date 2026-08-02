@@ -1,0 +1,149 @@
+{
+  "theme": "dark",
+  "brand": {
+    "name": "HRL Forge AI",
+    "description": "AI Engineering Platform for Embedded Systems, Robotics, IoT, Electronics, Industrial Automation.",
+    "aesthetic": "Premium dark IDE aesthetic (VS Code / Cursor-inspired) with HRL navy + gold accents. Professional engineering platform."
+  },
+  "colors": {
+    "primary": {
+      "DEFAULT": "#EAB308",
+      "hover": "#CA8A04",
+      "foreground": "#050B14"
+    },
+    "background": "#050B14",
+    "surface": {
+      "100": "#0A1325",
+      "200": "#111C33",
+      "300": "#1E293B"
+    },
+    "border": "rgba(255, 255, 255, 0.1)",
+    "text": {
+      "primary": "#F8FAFC",
+      "secondary": "#94A3B8",
+      "muted": "#64748B"
+    },
+    "accent": {
+      "gold": "#FBBF24",
+      "navy": "#0B2A5B",
+      "danger": "#EF4444",
+      "success": "#22C55E"
+    }
+  },
+  "typography": {
+    "fonts": {
+      "heading": "Outfit, sans-serif",
+      "body": "IBM Plex Sans, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "rules": {
+      "h1": "text-4xl sm:text-5xl font-bold tracking-tight text-white",
+      "h2": "text-2xl sm:text-3xl font-semibold tracking-tight text-white",
+      "h3": "text-xl sm:text-2xl font-medium tracking-tight text-white",
+      "body": "text-base leading-relaxed text-slate-300",
+      "small": "text-sm text-slate-400 uppercase tracking-widest"
+    }
+  },
+  "spacing_and_layout": {
+    "ide_shell": {
+      "sidebar_width": "w-64",
+      "sidebar_bg": "bg-[#050B14]",
+      "sidebar_border": "border-r border-white/10",
+      "topbar_height": "h-14",
+      "main_bg": "bg-[#0A1325]"
+    },
+    "bento_grid": {
+      "container": "grid grid-cols-1 md:grid-cols-12 gap-6",
+      "panel": "col-span-12 lg:col-span-6 bg-[#0A1325] border border-white/10 rounded-lg p-6"
+    },
+    "general": {
+      "padding": "p-6 sm:p-8 md:p-12",
+      "radius": "rounded-lg"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-yellow-500 hover:bg-yellow-600 text-[#050B14] font-medium px-4 py-2 rounded-md transition-all",
+      "secondary": "bg-white/5 hover:bg-white/10 border border-white/10 text-white px-4 py-2 rounded-md transition-all",
+      "ghost": "hover:bg-white/5 text-slate-300 hover:text-white px-4 py-2 rounded-md transition-all"
+    },
+    "cards": {
+      "default": "bg-[#0A1325] border border-white/10 rounded-lg p-6 hover:-translate-y-1 hover:shadow-lg transition-transform",
+      "interactive": "bg-[#0A1325] border border-white/10 rounded-lg p-6 hover:border-yellow-500/50 cursor-pointer transition-colors"
+    },
+    "inputs": {
+      "text": "bg-black/20 border border-white/10 rounded-md px-3 py-2 text-white focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all",
+      "prompt_area": "bg-black/30 border border-white/10 rounded-xl p-4 text-white placeholder-slate-500 focus-within:border-yellow-500/50 focus-within:ring-1 focus-within:ring-yellow-500/50"
+    },
+    "editor": {
+      "wrapper": "bg-[#030712] border border-white/10 rounded-lg overflow-hidden",
+      "header": "bg-[#050B14] border-b border-white/10 px-4 py-2 flex items-center justify-between text-sm text-slate-400"
+    },
+    "tabs": {
+      "list": "bg-black/20 border-b border-white/10 p-0 h-10 w-full justify-start rounded-none",
+      "trigger": "data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-yellow-500 data-[state=active]:text-yellow-500 text-slate-400 rounded-none px-4"
+    }
+  },
+  "visual_enhancers": {
+    "borders": "Use subtle 1px borders (border-white/10) for structure. Never use heavy box shadows, rely on borders and subtle background differences.",
+    "glows": "Use subtle glows on active elements. E.g. focus:ring-yellow-500/30",
+    "glassmorphism": "Use sparingly for sticky headers or context menus: bg-[#050B14]/80 backdrop-blur-xl border border-white/10."
+  },
+  "motion": {
+    "hover": "Subtle -translate-y-1 for cards. Background color shifts for buttons.",
+    "transitions": "transition-all duration-200 ease-in-out",
+    "loading": "Use ASCII spinners or subtle pulsing borders instead of generic loading circles."
+  },
+  "image_urls": [
+    {
+      "url": "https://images.unsplash.com/photo-1631375937044-6dd5beac01d2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHw0fHxtaWNyb2NvbnRyb2xsZXIlMjBnbG93aW5nJTIwZGFya3xlbnwwfHx8fDE3ODU2OTI1ODd8MA&ixlib=rb-4.1.0&q=85",
+      "category": "hero_background",
+      "description": "Dark glowing motherboard - use for landing page hero background with a heavy dark overlay (bg-black/70)"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1610563166150-b34df4f3bcd6",
+      "category": "features_showcase",
+      "description": "Black flat screen monitor - use in features section"
+    },
+    {
+      "url": "https://images.pexels.com/photos/9242834/pexels-photo-9242834.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "category": "about_community",
+      "description": "Students assembling robotics - use for community/templates showcase"
+    },
+    {
+      "url": "https://images.pexels.com/photos/5473309/pexels-photo-5473309.jpeg",
+      "category": "ide_preview",
+      "description": "Woman working late with code - use to represent the engineering workflow"
+    }
+  ],
+  "accessibility": {
+    "contrast": "Ensure all text against dark backgrounds passes WCAG AA. Muted text should not be darker than #64748B.",
+    "focus": "All interactive elements must have clear focus states (ring-yellow-500).",
+    "test_ids": "Add data-testid attributes to all interactive elements."
+  },
+  "icons": {
+    "library": "lucide-react",
+    "instructions": "Use Lucide icons for all UI elements. Use a bold/filled icon for the HRL logo (like Cpu or Hexagon) colored in text-yellow-500."
+  },
+  "instructions_to_main_agent": [
+    "Build this as a single-page app with React Router.",
+    "Use standard HTML/Tailwind for the landing page (no Shadcn cards, just pure divs for maximum design freedom).",
+    "For the IDE layout (Dashboard, Workspace), use a fixed sidebar (`w-64`) and a main content area (`calc(100vw-16rem)`).",
+    "Implement the Workspace as a grid or flex layout using Shadcn Resizable panels (`components/ui/resizable.jsx`) to mimic VS Code.",
+    "Use Monaco Editor (via `@monaco-editor/react`) for code editing, configured with a dark theme like 'vs-dark'.",
+    "Integrate Shadcn Tabs for the Output section (Code, Explanation, Libraries, Connections, Optimization, Download).",
+    "Use Shadcn Select for Board and Language selection in the prompt area.",
+    "DO NOT use Inter or Space Grotesk. Use Outfit for headings and IBM Plex Sans for body. Add these via Google Fonts in index.html.",
+    "Never use completely transparent backgrounds where text overlays images; always use a backdrop blur or solid dark scrim.",
+    "Use the dark theme as default and only theme.",
+    "Add data-testid to all buttons, inputs, links, tabs, and major containers."
+  ],
+  "universal_guidelines_for_main_agent": [
+    "Avoid generic centered layouts. Use grid/bento layouts or asymmetrical spacing.",
+    "Create depth through layered design elements with z-index hierarchy (e.g. fixed sidebars, floating prompt bars).",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Do not apply universal transition (`transition: all`). Add transitions for specific properties.",
+    "Use `sonner` for toast notifications.",
+    "Prioritize optical alignment over geometric alignment."
+  ]
+}
