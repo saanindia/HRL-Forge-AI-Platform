@@ -64,3 +64,5 @@ industrial automation. Not a ChatGPT wrapper — a professional engineering work
 - Iter 2: Wiring Generator page with visual pin-map + Simulate tab (Wokwi + Serial preview)
 - Iter 3: Component Library picker on Wiring page; Shareable Wiring (public /share/wiring/:token);
   Emergent Google Auth bridged into existing JWT flow (/auth/callback + POST /api/v1/auth/google)
+- Iter 4: Global Search palette (Cmd+K, /api/v1/search); Fork a Share flow (/app/wiring?fork=<token>);
+  Wokwi launcher always-clickable with dynamic label (empty playground vs. with-code)
