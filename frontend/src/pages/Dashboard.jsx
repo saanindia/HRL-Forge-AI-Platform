@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [projects, setProjects] = useState([]);
   const [history, setHistory] = useState([]);
   const [templates, setTemplates] = useState([]);
+  const [templateCount, setTemplateCount] = useState(0);
 
   useEffect(() => {
     Promise.all([
@@ -30,6 +31,7 @@ export default function Dashboard() {
       .then(([p, h, t]) => {
         setProjects(p.data);
         setHistory(h.data);
+        setTemplateCount(t.data.length);
         setTemplates(t.data.slice(0, 4));
       })
       .catch(() => {});
@@ -38,7 +40,7 @@ export default function Dashboard() {
   const stats = [
     { label: "Projects", value: projects.length, icon: FolderKanban, id: "stat-projects" },
     { label: "Generations", value: history.length, icon: Sparkles, id: "stat-generations" },
-    { label: "Templates", value: templates.length, icon: BookMarked, id: "stat-templates" },
+    { label: "Templates", value: templateCount, icon: BookMarked, id: "stat-templates" },
     { label: "Boards ready", value: 8, icon: Cpu, id: "stat-boards" },
   ];
 
