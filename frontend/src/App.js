@@ -19,6 +19,7 @@ import Settings from "@/pages/Settings";
 import Documentation from "@/pages/Documentation";
 import Admin from "@/pages/Admin";
 import Assistant from "@/pages/Assistant";
+import WiringGenerator from "@/pages/WiringGenerator";
 
 export default function App() {
   return (
@@ -46,6 +47,7 @@ export default function App() {
           />
           <Route path="/app/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/app/workspace" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
+          <Route path="/app/wiring" element={<ProtectedRoute><WiringGenerator /></ProtectedRoute>} />
           <Route path="/app/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
           <Route path="/app/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
           <Route path="/app/boards" element={<ProtectedRoute><Boards /></ProtectedRoute>} />

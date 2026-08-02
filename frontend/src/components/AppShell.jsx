@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   LogOut,
   MessageSquareCode,
+  CircuitBoard,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/context/AuthContext";
@@ -20,6 +21,7 @@ import { Button } from "@/components/ui/button";
 const NAV = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
   { to: "/app/workspace", label: "AI Workspace", icon: Terminal, id: "workspace" },
+  { to: "/app/wiring", label: "Wiring Generator", icon: CircuitBoard, id: "wiring" },
   { to: "/app/projects", label: "Projects", icon: FolderKanban, id: "projects" },
   { to: "/app/templates", label: "Templates", icon: BookMarked, id: "templates" },
   { to: "/app/boards", label: "Boards", icon: Cpu, id: "boards" },

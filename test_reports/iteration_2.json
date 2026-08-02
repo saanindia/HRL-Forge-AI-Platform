@@ -1,0 +1,33 @@
+{
+  "summary": "Iteration 2 testing complete for HRL Forge AI. Backend: NEW serial mode on /api/v1/generate returns multi-line explanation (~2.3KB simulated Serial log for a Blink sketch) — PASS. Regression on generate mode with esp32 + DHT22 returns non-empty code/explanation/libraries — PASS. Frontend: Wiring Generator page at /app/wiring loads with all required data-testids (wiring-board-select, wiring-prompt, wiring-generate-btn, wiring-tab-diagram/mapping/bom/notes), Arduino Uno R3 default, ATmega MCU meta visible, Voltage guard banner shows, 5 suggestion chips render and populate the prompt on click, nav-wiring is highlighted. Workspace Simulate tab: after real Claude code generation (~32s), tab-simulate reveals SimulatePanel with Wokwi + Serial Preview cards. wokwi-launch-btn enabled (code present), serial-preview-btn click produces serial-output populated in ~33s with realistic Serial Monitor log. All 7 Workspace tabs (code/explanation/libraries/connections/optimization/simulate/download) render. Logout redirects to /login.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "SimulatePanel / Serial Monitor", "issues": ["Serial output contains markdown fences and heading (## Simulated Serial Monitor Output, ``` code blocks). The prompt asks for plain-text serial log but Claude wraps output in markdown. Consider stripping code fences / markdown before rendering, or tightening the prompt to enforce 'no markdown, no headings — output the raw lines only'."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration2.py",
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/iteration2_results.xml"
+  ],
+  "action_items": [
+    "(Optional polish) Tighten the 'serial' PromptBuilder mode in /app/backend/ai_engine/provider_manager.py to explicitly forbid markdown fences/headings so the serial-output block shows a pure terminal log. Current output is functional but visually mixes markdown with the terminal styling."
+  ],
+  "critical_code_review_comments": [
+    "SimulatePanel.jsx correctly disables Wokwi/Serial buttons when !code — good defensive UX.",
+    "WiringGenerator.jsx makes two sequential /generate calls per run (wiring + BOM). Consider Promise.all for ~2x UX speed; agreed with in-code comment.",
+    "The 'serial' mode in PromptBuilder returns the log inside `explanation`, which is a markdown field elsewhere in the app — LLM defaulted to markdown formatting. Add an explicit 'raw plain text, no markdown, no code fences' constraint.",
+    "AppShell nav-<id> testids are consistent with iteration 1; wiring nav item added cleanly."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration2.py (new)"],
+  "success_rate": { "backend": "100% (2/2 new + 31/31 iteration-1 regression not re-run)", "frontend": "100% critical flows" },
+  "test_credentials": "Registered fresh users at runtime: hrl.qa.it2+{ts}@myhrl.in / Forge2026! (backend), hrl.qa.ui.it2+{ts}@myhrl.in / Forge2026! (frontend).",
+  "seed_data_creation": "None. Backend seed_all() populated on startup.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Run new iteration-2 tests: `pytest /app/backend/tests/test_iteration2.py -n 0 -v` (serial mode uses real Claude, ~30-60s per call). For frontend Wiring page, do NOT click wiring-generate-btn during automated tests — it fires 2 sequential Claude calls (wiring + BOM). Simulate tab test in Workspace is safe (single serial call ~30s). Registration form uses placeholder-based selectors: get_by_placeholder('Ada Lovelace'|'you@myhrl.in'|'At least 6 characters'). Only very minor polish item flagged — the serial-output rendering shows markdown fences from Claude; tighten prompt to strip them.",
+  "rca of the issue": "No blocking issues. Serial output includes markdown wrapping (## heading, ``` fence) because the LLM defaults to markdown when writing into the JSON `explanation` field. Reproduction: click serial-preview-btn on a generated Blink sketch → observe headings/fences in serial-output. Mitigation: add explicit constraint in PromptBuilder.MODES['serial'] such as 'Return ONLY the raw serial lines. No markdown, no code fences, no headings. Start directly with the first line the microcontroller would print.'"
+}

@@ -103,6 +103,13 @@ class PromptBuilder:
         "optimize": "Optimize this code for performance, memory usage, and power consumption:",
         "wiring": "Generate the exact wiring/connection diagram (as structured pin mappings) for this project:",
         "bom": "Generate the Bill of Materials (BOM) with components, quantities, and specs:",
+        "serial": (
+            "Simulate the Serial Monitor output that a user would see when this code runs. "
+            "Show ~15-25 realistic lines of output including startup messages, sensor readings, "
+            "wifi/mqtt handshakes if applicable, and a couple of loop iterations. Use realistic "
+            "values. Return the simulated output in the `explanation` field as a plain-text serial log "
+            "(one line per output). Leave `code` unchanged."
+        ),
     }
 
     @staticmethod

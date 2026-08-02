@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { SimulatePanel } from "@/components/SimulatePanel";
 
 const LANGUAGES = [
   "Arduino C++",
@@ -349,6 +350,7 @@ export default function Workspace() {
                   ["libraries", "Libraries"],
                   ["connections", "Connections"],
                   ["optimization", "Optimization"],
+                  ["simulate", "Simulate"],
                   ["download", "Download"],
                 ].map(([v, l]) => (
                   <TabsTrigger
@@ -437,6 +439,10 @@ export default function Workspace() {
                   {optimization ? <Markdownish content={optimization} /> : (
                     <Empty label="No optimization notes yet — run Mode: Optimize." />
                   )}
+                </TabsContent>
+
+                <TabsContent value="simulate" className="m-0 p-6">
+                  <SimulatePanel code={code} board={board} language={language} prompt={prompt} />
                 </TabsContent>
 
                 <TabsContent value="download" className="m-0 p-6">
