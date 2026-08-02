@@ -49,7 +49,7 @@ export function SimulatePanel({ code, board, language, prompt }) {
         mode: "serial",
         existing_code: code,
       });
-      setSerial(data.explanation || "(no serial output produced)");
+      setSerial(stripMarkdown(data.explanation || "(no serial output produced)"));
       toast.success("Serial output simulated");
     } catch (e) {
       toast.error(e?.response?.data?.detail || "Simulation failed");
@@ -236,4 +236,21 @@ function humanBoard(slug) {
     "stm32": "STM32 Blue Pill",
   };
   return m[slug] || slug;
+}
+
+/** Strip any accidental markdown wrappers so the serial monitor stays terminal-pure. */
+function stripMarkdown(text) {
+  return String(text)
+    // Drop code fences ```...```
+    .replace(/```[a-zA-Z0-9]*\n?/g, "")
+    .replace(/```/g, "")
+    // Drop markdown headings (## Title, # Title) at the start of a line
+    .replace(/^#{1,6}\s.*$/gm, "")
+    // Drop bold/italic markers
+    .replace(/\*\*/g, "")
+    .replace(/(^|\s)_([^_]+)_/g, "$1$2")
+    // Trim leading/trailing blank lines
+    .replace(/^\s+|\s+$/g, "")
+    // Collapse >2 consecutive blank lines
+    .replace(/\n{3,}/g, "\n\n");
 }

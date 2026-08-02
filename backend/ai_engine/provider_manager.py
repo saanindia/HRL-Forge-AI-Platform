@@ -107,8 +107,10 @@ class PromptBuilder:
             "Simulate the Serial Monitor output that a user would see when this code runs. "
             "Show ~15-25 realistic lines of output including startup messages, sensor readings, "
             "wifi/mqtt handshakes if applicable, and a couple of loop iterations. Use realistic "
-            "values. Return the simulated output in the `explanation` field as a plain-text serial log "
-            "(one line per output). Leave `code` unchanged."
+            "values. Return the simulated output in the `explanation` field as a raw plain-text "
+            "serial log — ONE LINE PER OUTPUT. Absolutely NO markdown, NO code fences (```), "
+            "NO headings (##), NO explanation prose. Start directly with the very first character "
+            "the microcontroller would print. Leave `code` unchanged."
         ),
     }
 
