@@ -1,89 +1,104 @@
-from fastapi import FastAPI, APIRouter
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+"""HRL Forge AI - FastAPI backend entrypoint."""
 import os
 import logging
-from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List
 import uuid
-from datetime import datetime, timezone
+from pathlib import Path
+from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
+from fastapi import FastAPI, APIRouter, Request
+from fastapi.responses import JSONResponse
+from starlette.middleware.cors import CORSMiddleware
 
 ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+load_dotenv(ROOT_DIR / ".env")
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+from database import get_db, close_db  # noqa: E402
+from seed_data import seed_all  # noqa: E402
+from routers.auth_router import router as auth_router  # noqa: E402
+from routers.projects_router import router as projects_router  # noqa: E402
+from routers.generate_router import router as generate_router  # noqa: E402
+from routers.history_router import router as history_router  # noqa: E402
+from routers.knowledge_router import router as knowledge_router  # noqa: E402
+from routers.chat_router import router as chat_router  # noqa: E402
+from routers.settings_router import router as settings_router  # noqa: E402
+from routers.admin_router import router as admin_router  # noqa: E402
 
-# Create the main app without a prefix
-app = FastAPI()
 
-# Create a router with the /api prefix
-api_router = APIRouter(prefix="/api")
+# ---------- Logging ----------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+logger = logging.getLogger("hrl-forge")
 
 
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("HRL Forge AI backend starting up...")
+    try:
+        await seed_all()
+        logger.info("Knowledge base seeded.")
+    except Exception as e:
+        logger.exception("Seed failed: %s", e)
+    yield
+    await close_db()
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
 
-# Add your routes to the router instead of directly to app
-@api_router.get("/")
-async def root():
-    return {"message": "Hello World"}
+app = FastAPI(
+    title="HRL Forge AI",
+    description="AI Engineering Platform for Embedded Systems, Robotics, IoT, Electronics.",
+    version="1.0.0",
+    lifespan=lifespan,
+)
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
-
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
-
-# Include the router in the main app
-app.include_router(api_router)
-
+# ---------- Middleware ----------
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","),
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
+@app.middleware("http")
+async def add_request_id(request: Request, call_next):
+    request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = request_id
+    return response
+
+
+# ---------- API v1 router ----------
+api_router = APIRouter(prefix="/api")
+v1 = APIRouter(prefix="/v1")
+
+
+@api_router.get("/")
+async def root():
+    return {"name": "HRL Forge AI", "version": "1.0.0", "status": "ok"}
+
+
+@api_router.get("/health")
+async def health():
+    return {"status": "healthy"}
+
+
+v1.include_router(auth_router)
+v1.include_router(projects_router)
+v1.include_router(generate_router)
+v1.include_router(history_router)
+v1.include_router(knowledge_router)
+v1.include_router(chat_router)
+v1.include_router(settings_router)
+v1.include_router(admin_router)
+
+api_router.include_router(v1)
+app.include_router(api_router)
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.exception("Unhandled error: %s", exc)
+    return JSONResponse(status_code=500, content={"detail": "Internal server error"})
