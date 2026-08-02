@@ -20,6 +20,8 @@ import Documentation from "@/pages/Documentation";
 import Admin from "@/pages/Admin";
 import Assistant from "@/pages/Assistant";
 import WiringGenerator from "@/pages/WiringGenerator";
+import AuthCallback from "@/pages/AuthCallback";
+import SharedWiring from "@/pages/SharedWiring";
 
 export default function App() {
   return (
@@ -41,6 +43,8 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/share/wiring/:token" element={<SharedWiring />} />
           <Route
             path="/app"
             element={<Navigate to="/app/dashboard" replace />}

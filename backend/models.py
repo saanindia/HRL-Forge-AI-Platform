@@ -26,6 +26,36 @@ class UserLogin(BaseModel):
     password: str
 
 
+class GoogleAuthRequest(BaseModel):
+    session_id: str
+
+
+# ---------- WIRING SHARE ----------
+class WiringShareCreate(BaseModel):
+    prompt: str
+    board: str
+    board_name: Optional[str] = None
+    connections: List[Dict[str, Any]] = []
+    bom: List[Dict[str, Any]] = []
+    libraries: List[str] = []
+    notes: str = ""
+
+
+class WiringShare(BaseModel):
+    id: str = Field(default_factory=_uuid)
+    token: str = Field(default_factory=lambda: _uuid().replace("-", "")[:12])
+    user_id: str
+    prompt: str
+    board: str
+    board_name: Optional[str] = None
+    connections: List[Dict[str, Any]] = []
+    bom: List[Dict[str, Any]] = []
+    libraries: List[str] = []
+    notes: str = ""
+    view_count: int = 0
+    created_at: str = Field(default_factory=_now)
+
+
 class UserPublic(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str

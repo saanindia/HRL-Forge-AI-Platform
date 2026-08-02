@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { PinDiagram } from "@/components/PinDiagram";
+import { ComponentLibrary } from "@/components/ComponentLibrary";
+import { Share2, Check } from "lucide-react";
 
 const SUGGESTIONS = [
   "DHT22 temperature sensor + SSD1306 OLED display",
@@ -42,6 +44,26 @@ export default function WiringGenerator() {
   const [bom, setBom] = useState([]);
   const [notes, setNotes] = useState("");
   const [libraries, setLibraries] = useState([]);
+  const [components, setComponents] = useState([]);
+  const [shareUrl, setShareUrl] = useState("");
+  const [sharing, setSharing] = useState(false);
+
+  const addComponent = (c) => setComponents((prev) => [...prev, c]);
+  const removeComponent = (slug) =>
+    setComponents((prev) => prev.filter((c) => c.slug !== slug));
+
+  // Auto-compose prompt when components change (only if user hasn't typed a custom one)
+  useEffect(() => {
+    if (!components.length) return;
+    const list = components.map((c) => c.name).join(", ");
+    setPrompt((prev) => {
+      // If existing prompt clearly matches an older component set, replace it
+      if (!prev || prev.startsWith("Wire up these components:")) {
+        return `Wire up these components: ${list}. Provide pin mapping, wiring notes and BOM.`;
+      }
+      return prev;
+    });
+  }, [components]);
 
   useEffect(() => {
     api.get("/boards").then((r) => setBoards(r.data));
@@ -82,10 +104,38 @@ export default function WiringGenerator() {
       toast.success(
         `Wiring generated — ${wiring.connections?.length || 0} pin connections mapped`
       );
+      setShareUrl(""); // invalidate previous share
     } catch (e) {
       toast.error(e?.response?.data?.detail || "Wiring generation failed");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const shareWiring = async () => {
+    if (!connections.length) {
+      toast.error("Generate wiring first");
+      return;
+    }
+    setSharing(true);
+    try {
+      const { data } = await api.post("/wiring/share", {
+        prompt,
+        board,
+        board_name: boardObj?.name || board,
+        connections,
+        bom,
+        libraries,
+        notes,
+      });
+      const url = `${window.location.origin}/share/wiring/${data.token}`;
+      setShareUrl(url);
+      await navigator.clipboard.writeText(url);
+      toast.success("Public link copied to clipboard");
+    } catch (e) {
+      toast.error("Failed to create share");
+    } finally {
+      setSharing(false);
     }
   };
 
@@ -237,6 +287,13 @@ export default function WiringGenerator() {
               </div>
             </div>
 
+            {/* Component library picker */}
+            <ComponentLibrary
+              selected={components}
+              onAdd={addComponent}
+              onRemove={removeComponent}
+            />
+
             {/* Warnings / notes */}
             {boardObj && (
               <div className="p-4 rounded-lg border border-yellow-500/20 bg-yellow-500/[0.03] text-xs text-yellow-100 font-mono">
@@ -254,6 +311,39 @@ export default function WiringGenerator() {
 
           {/* Right: output */}
           <div className="lg:col-span-7">
+            {/* Share bar */}
+            {connections.length > 0 && (
+              <div className="mb-3 flex items-center justify-end gap-2">
+                {shareUrl && (
+                  <div
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-yellow-500/10 border border-yellow-500/30 text-xs font-mono text-yellow-200"
+                    data-testid="share-url-display"
+                  >
+                    <Check className="w-3.5 h-3.5 text-yellow-400" />
+                    <span className="truncate max-w-[260px]">{shareUrl}</span>
+                  </div>
+                )}
+                <Button
+                  onClick={shareWiring}
+                  disabled={sharing}
+                  variant="outline"
+                  size="sm"
+                  className="border-yellow-500/30 bg-yellow-500/5 text-yellow-400 hover:bg-yellow-500/10 hover:text-yellow-300 h-9"
+                  data-testid="share-wiring-btn"
+                >
+                  {sharing ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Sharing…
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-3.5 h-3.5 mr-1.5" />
+                      {shareUrl ? "Regenerate share link" : "Share publicly"}
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
             <div className="rounded-xl border border-white/10 bg-[#0A1325] overflow-hidden">
               <Tabs defaultValue="diagram" className="w-full">
                 <TabsList className="w-full justify-start rounded-none border-b border-white/10 bg-[#050B14] h-11 px-2">

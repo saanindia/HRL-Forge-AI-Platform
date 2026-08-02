@@ -8,6 +8,11 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // If arriving from OAuth callback, let AuthCallback do the token exchange first.
+    if (typeof window !== "undefined" && window.location.hash?.includes("session_id=")) {
+      setLoading(false);
+      return;
+    }
     const token = localStorage.getItem("hrl_token");
     if (!token) {
       setLoading(false);
@@ -19,6 +24,18 @@ export const AuthProvider = ({ children }) => {
       .catch(() => localStorage.removeItem("hrl_token"))
       .finally(() => setLoading(false));
   }, []);
+
+  const setUserFromToken = async () => {
+    try {
+      const r = await api.get("/auth/me");
+      setUser(r.data);
+      return r.data;
+    } catch {
+      localStorage.removeItem("hrl_token");
+      setUser(null);
+      return null;
+    }
+  };
 
   const login = async (email, password) => {
     const { data } = await api.post("/auth/login", { email, password });
@@ -40,7 +57,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthCtx.Provider value={{ user, loading, login, register, logout }}>
+    <AuthCtx.Provider value={{ user, loading, login, register, logout, setUserFromToken }}>
       {children}
     </AuthCtx.Provider>
   );
