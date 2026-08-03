@@ -7,8 +7,8 @@ industrial automation. Not a ChatGPT wrapper — a professional engineering work
 
 ## Stack
 - Frontend: React 19 + Tailwind + shadcn/ui + Monaco editor + react-router-dom 7
-- Backend: FastAPI + Motor (MongoDB) + Emergent LLM library
-- AI: Claude Sonnet 4.6 via Emergent Universal LLM Key (provider abstraction ready)
+- Backend: FastAPI + Motor (MongoDB) + httpx
+- AI: OpenRouter (default, Claude Sonnet 4.5) with abstraction for Gemini, Groq, HuggingFace, Ollama
 - Auth: JWT (email + password, bcrypt)
 
 ## User Personas
@@ -63,6 +63,6 @@ industrial automation. Not a ChatGPT wrapper — a professional engineering work
 - Deployment-ready (single supervisor stack)
 - Iter 2: Wiring Generator page with visual pin-map + Simulate tab (Wokwi + Serial preview)
 - Iter 3: Component Library picker on Wiring page; Shareable Wiring (public /share/wiring/:token);
-  Emergent Google Auth bridged into existing JWT flow (/auth/callback + POST /api/v1/auth/google)
+  Google Auth removed (was vendor-managed) — email/password JWT remains the only auth path
 - Iter 4: Global Search palette (Cmd+K, /api/v1/search); Fork a Share flow (/app/wiring?fork=<token>);
   Wokwi launcher always-clickable with dynamic label (empty playground vs. with-code)

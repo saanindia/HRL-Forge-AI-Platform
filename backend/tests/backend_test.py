@@ -238,12 +238,12 @@ class TestSettings:
 
     def test_update(self, session, auth_headers):
         r = session.put(f"{V1}/settings", json={
-            "default_provider": "emergent",
-            "default_model": "claude-sonnet-4-5-20250929"
+            "default_provider": "openrouter",
+            "default_model": "anthropic/claude-sonnet-4.5"
         }, headers=auth_headers, timeout=15)
         assert r.status_code == 200
         data = r.json()
-        assert data.get("default_provider") == "emergent"
+        assert data.get("default_provider") == "openrouter"
 
 
 # ---------- Chat ----------

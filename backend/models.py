@@ -26,10 +26,6 @@ class UserLogin(BaseModel):
     password: str
 
 
-class GoogleAuthRequest(BaseModel):
-    session_id: str
-
-
 # ---------- WIRING SHARE ----------
 class WiringShareCreate(BaseModel):
     prompt: str

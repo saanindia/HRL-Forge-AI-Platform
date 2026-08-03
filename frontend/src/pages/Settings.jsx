@@ -37,7 +37,7 @@ export default function Settings() {
         </div>
 
         {/* Provider */}
-        <Panel title="AI Provider" subtitle="Claude Sonnet 4.6 by default (Emergent LLM Key). Change anytime.">
+        <Panel title="AI Provider" subtitle="OpenRouter with Claude Sonnet 4.5 by default. Change anytime.">
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Provider</Label>

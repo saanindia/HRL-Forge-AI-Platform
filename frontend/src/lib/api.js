@@ -12,5 +12,4 @@ api.interceptors.request.use((cfg) => {
   return cfg;
 });
 
-export const HRL_LOGO =
-  "https://customer-assets-lqy194kg.emergentagent.net/job_dde0188d-6e2d-47cb-8ad3-74a88b66706d/artifacts/iupb5zcm_new_logo_nbgnd.png";
+export const HRL_LOGO = "/hrl-logo.png";

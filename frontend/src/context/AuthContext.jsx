@@ -8,11 +8,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // If arriving from OAuth callback, let AuthCallback do the token exchange first.
-    if (typeof window !== "undefined" && window.location.hash?.includes("session_id=")) {
-      setLoading(false);
-      return;
-    }
     const token = localStorage.getItem("hrl_token");
     if (!token) {
       setLoading(false);
