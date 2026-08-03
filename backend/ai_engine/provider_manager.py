@@ -76,6 +76,7 @@ class ProviderManager:
         return {
             "active": [
                 {
+                    "provider": p,
                     "id": p,
                     "models": models,
                     "requires_key": p != "ollama",
