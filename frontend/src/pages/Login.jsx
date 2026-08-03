@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { HRL_LOGO } from "@/lib/api";
 import { Loader2 } from "lucide-react";
+import { GoogleButton } from "@/components/GoogleButton";
 
 export default function Login() {
   const { login } = useAuth();
@@ -114,8 +115,15 @@ export default function Login() {
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enter the Forge"}
           </Button>
 
+          <div className="flex items-center gap-3 my-2">
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-mono">or</span>
+            <div className="flex-1 h-px bg-white/10" />
+          </div>
+          <GoogleButton label="Sign in with Google" />
+
           <div className="text-xs text-center text-slate-500 font-mono">
-            Social login (Google / GitHub) — coming soon.
+            GitHub login — coming soon.
           </div>
         </form>
       </div>

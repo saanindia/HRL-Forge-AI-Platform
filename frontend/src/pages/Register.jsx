@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { HRL_LOGO } from "@/lib/api";
 import { Loader2 } from "lucide-react";
+import { GoogleButton } from "@/components/GoogleButton";
 
 export default function Register() {
   const { register } = useAuth();
@@ -106,6 +107,13 @@ export default function Register() {
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create account"}
           </Button>
+
+          <div className="flex items-center gap-3 my-2">
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-mono">or</span>
+            <div className="flex-1 h-px bg-white/10" />
+          </div>
+          <GoogleButton label="Sign up with Google" />
 
           <p className="text-xs text-slate-500 text-center">
             By continuing you agree to HRL's Terms & Privacy policy.
