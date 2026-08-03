@@ -1,0 +1,12 @@
+# Railway config — HRL Forge AI frontend
+# Deploys the production build via Dockerfile. NEVER runs `yarn start`.
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "serve -s build -l ${PORT:-3000}"
+healthcheckPath = "/"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10

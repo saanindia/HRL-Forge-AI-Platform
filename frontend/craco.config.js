@@ -2,9 +2,9 @@
 const path = require("path");
 require("dotenv").config();
 
-// Check if we're in development/preview mode (not production build)
-// Craco sets NODE_ENV=development for start, NODE_ENV=production for build
-const isDevServer = process.env.NODE_ENV !== "production";
+// Craco/CRA sets NODE_ENV=development for `start`, NODE_ENV=production for `build`.
+const isProduction = process.env.NODE_ENV === "production";
+const isDevServer = !isProduction;
 
 // Environment variable overrides
 const config = {
@@ -102,12 +102,61 @@ let webpackConfig = {
       if (config.enableHealthCheck && healthPluginInstance) {
         webpackConfig.plugins.push(healthPluginInstance);
       }
+
+      // -------------------------------------------------------------
+      // Production safety: strip any react-refresh / HMR remnants.
+      // CRA/react-scripts 5 already excludes these from production
+      // builds, but we belt-and-braces it in case a transitive plugin
+      // ever re-adds them. Without this the app can ship with the
+      // "React Refresh runtime should not be included in the
+      // production bundle" runtime error.
+      // -------------------------------------------------------------
+      if (isProduction) {
+        // Remove HMR / react-refresh webpack plugins if any snuck in
+        webpackConfig.plugins = (webpackConfig.plugins || []).filter((plugin) => {
+          const name = plugin && plugin.constructor && plugin.constructor.name;
+          return (
+            name !== "ReactRefreshPlugin" &&
+            name !== "ReactRefreshWebpackPlugin" &&
+            name !== "HotModuleReplacementPlugin"
+          );
+        });
+
+        // Strip react-refresh babel plugin from every JS/TS rule
+        const stripRefreshFromLoader = (rule) => {
+          if (!rule) return;
+          if (Array.isArray(rule.use)) rule.use.forEach(stripRefreshFromLoader);
+          if (rule.oneOf) rule.oneOf.forEach(stripRefreshFromLoader);
+          if (rule.rules) rule.rules.forEach(stripRefreshFromLoader);
+          const opts = rule.options;
+          if (opts && Array.isArray(opts.plugins)) {
+            opts.plugins = opts.plugins.filter((p) => {
+              const id = Array.isArray(p) ? p[0] : p;
+              return typeof id !== "string" || !id.includes("react-refresh");
+            });
+          }
+        };
+        (webpackConfig.module?.rules || []).forEach(stripRefreshFromLoader);
+
+        // Ensure react-refresh runtime is never bundled — hard alias to false
+        webpackConfig.resolve = webpackConfig.resolve || {};
+        webpackConfig.resolve.alias = {
+          ...(webpackConfig.resolve.alias || {}),
+          "react-refresh/runtime": false,
+          "react-refresh/babel": false,
+        };
+      }
+
       return webpackConfig;
     },
   },
 };
 
 webpackConfig.devServer = (devServerConfig) => {
+  // Dev-server hook is a no-op in production builds — CRA never invokes it,
+  // but we keep the function shape for craco's spec.
+  if (isProduction) return devServerConfig;
+
   // Add health check endpoints if enabled
   if (config.enableHealthCheck && setupHealthEndpoints && healthPluginInstance) {
     const originalSetupMiddlewares = devServerConfig.setupMiddlewares;

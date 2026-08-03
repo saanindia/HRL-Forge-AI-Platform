@@ -1,0 +1,10 @@
+# Local dev artifacts — never ship to Railway
+node_modules
+build
+.env.local
+.env.development
+.env.test
+coverage
+.eslintcache
+tests
+tests-artifacts
