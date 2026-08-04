@@ -10,25 +10,22 @@ RUN yarn install --frozen-lockfile
 # Copy source
 COPY . .
 
-# Ensure production build with NODE_ENV=production
-ENV NODE_ENV=production
+# Build the production bundle (NODE_ENV=production is set by cross-env in `yarn build`)
 ENV DISABLE_ESLINT_PLUGIN=true
 RUN yarn build
 
-# -------- Stage 2: serve the static build with `serve` --------
-FROM node:20-alpine AS runner
+# -------- Stage 2: serve static assets via nginx --------
+FROM nginx:1.27-alpine AS runner
 
-WORKDIR /srv
+# Copy built assets from stage 1
+COPY --from=builder /app/build /usr/share/nginx/html
 
-# Install a tiny static server
-RUN yarn global add serve@14
-
-# Copy built assets only — NO source, NO dev deps
-COPY --from=builder /app/build ./build
+# Custom nginx config: SPA fallback + gzip + long-lived cache for static assets
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
 # Railway supplies $PORT at runtime; default to 3000 locally
 ENV PORT=3000
 EXPOSE 3000
 
-# `serve -s` = single-page-app mode (fallback to index.html for client-side routes)
-CMD ["sh", "-c", "serve -s build -l ${PORT:-3000}"]
+# nginx:alpine automatically substitutes env vars in templates via envsubst
+CMD ["/bin/sh", "-c", "envsubst '${PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"]

@@ -1,0 +1,77 @@
+{
+  "summary": "Iteration 7 — Production build purity + Railway deployment hardening. Verified `yarn build` produces a clean, deterministic bundle with ZERO react-refresh/HMR references, http-server serves it on :4004 with SPA fallback working for arbitrary React Router routes (/dashboard, /workspace, /share/wiring/anytoken), dev server still functions on :3000 after supervisor restart, all Railway/Docker artifacts present with expected content, craco guard block correctly filters HMR plugins + walks module.rules + aliases react-refresh runtime to false, and backend regression is 100% clean (health, register, login, providers with auth, google 503).",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration6_google_auth.py",
+    "/app/backend/tests/backend_test.py"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "craco.config.js production guard is solid — filters ReactRefreshPlugin/ReactRefreshWebpackPlugin/HotModuleReplacementPlugin, recursively strips react-refresh from babel loader options across rule/oneOf/rules/use, and aliases 'react-refresh/runtime' + 'react-refresh/babel' to false. Belt-and-braces protection is appropriate.",
+    "yarn serve uses http-server with --proxy http://localhost:${PORT}? as SPA fallback — verified working. Note: the '?' at the end of the proxy URL is a workaround for http-server's fallback mechanism; unusual but functional.",
+    "Dockerfile uses nginx:1.27-alpine template envsubst pattern — clean multi-stage build (~10s builder step). PORT env correctly substituted in nginx.conf via envsubst on startup.",
+    "Backend Dockerfile is minimal but correct — uvicorn on ${PORT:-8001}, healthcheck /api/health wired in railway.toml.",
+    "Build is deterministic — main bundle hash main.fdea9ee4.js identical across two consecutive builds."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "100% (5/5 endpoints)", "frontend": "100% (build purity + serve + SPA + dev + Railway artifacts)" },
+  "test_credentials": "Registered fresh TEST_it7_<ts>@example.com at runtime — no persistent seed",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Production bundle is now guaranteed react-refresh-free via craco.config.js NODE_ENV=production guard. If the Railway blank-screen issue reappears, the cause is deployment config (Railway ignoring Dockerfile/railway.toml) rather than the build itself. `yarn serve` uses http-server (not `serve` package) so previous path-to-regexp crash cannot recur. Bundle path: /app/frontend/build/static/js/main.<hash>.js (188.08 kB gzip).",
+  "verification_details": {
+    "prod_build_purity": {
+      "build_success": true,
+      "react_refresh_in_bundle": 0,
+      "hmr_in_bundle": 0,
+      "react_refresh_in_index_html": 0,
+      "main_bundle_refs": ["/static/js/main.fdea9ee4.js"]
+    },
+    "prod_server_sanity": {
+      "http_server_start": "OK — no path-to-regexp crash",
+      "root_status": 200,
+      "root_has_div_root": true,
+      "bundle_status": 200
+    },
+    "spa_fallback": {
+      "/dashboard": 200,
+      "/workspace": 200,
+      "/share/wiring/anytoken": 200
+    },
+    "dev_mode": {
+      "second_build_success": true,
+      "deterministic_hash": true,
+      "dev_server_after_restart_port_3000": 200
+    },
+    "railway_artifacts": {
+      "frontend_Dockerfile_nginx_1.27_alpine": true,
+      "frontend_Dockerfile_NODE_ENV_production": true,
+      "frontend_Dockerfile_yarn_build": true,
+      "nginx_conf_try_files_fallback": true,
+      "frontend_railway_toml_dockerfile_builder": true,
+      "backend_Dockerfile_uvicorn": true,
+      "backend_railway_toml_uvicorn_PORT": true,
+      "frontend_dockerignore_node_modules_and_build": true
+    },
+    "craco_guards": {
+      "filters_refresh_and_hmr_plugins": true,
+      "walks_module_rules_strips_babel_refresh": true,
+      "aliases_react_refresh_runtime_false": true
+    },
+    "backend_regression": {
+      "/api/health": 200,
+      "/api/v1/auth/register": 200,
+      "/api/v1/auth/login": 200,
+      "/api/v1/generate/providers (authed)": 200,
+      "providers_list_contains": ["openrouter", "gemini", "groq", "huggingface", "ollama"],
+      "/api/v1/auth/google (no client id)": 503
+    }
+  },
+  "rca of the issue": "Original prod blank screen was caused by Railway running `yarn start` (CRA dev server) instead of the production build — dev server injects react-refresh runtime which throws 'React Refresh runtime should not be included in the production bundle' in non-dev NODE_ENV. Fix combines: (1) craco.config.js hard-guard so even if a plugin tries to inject HMR/refresh in a NODE_ENV=production build, it is filtered + aliased-away; (2) new `yarn serve` = http-server (not the buggy `serve` pkg with path-to-regexp crash); (3) Dockerfile+railway.toml pin Railway deployment to the built nginx image so `yarn start` cannot be reached in production. All three layers verified."
+}
